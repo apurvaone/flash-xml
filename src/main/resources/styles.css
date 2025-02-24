@@ -62,3 +62,34 @@
 .button:pressed {
     -fx-background-color: #004080;
 }
+
+.scroll-button {
+    -fx-background-color: #0066cc;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 25;
+    -fx-min-width: 50px;
+    -fx-min-height: 50px;
+    -fx-max-width: 50px;
+    -fx-max-height: 50px;
+    -fx-opacity: 0.8;
+    -fx-cursor: hand;
+}
+
+.scroll-button:hover {
+    -fx-background-color: #0052a3;
+    -fx-opacity: 1;
+}
+
+.scroll-button:pressed {
+    -fx-background-color: #004080;
+}
+
+.line-number {
+    -fx-fill: #666666;
+    -fx-font-family: "JetBrains Mono", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-min-width: 40px;
+    -fx-padding: 0 10px 0 0;
+    -fx-text-alignment: right;
+}

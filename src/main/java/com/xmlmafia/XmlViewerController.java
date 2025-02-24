@@ -68,14 +68,55 @@ public class XmlViewerController {
                     .map(node -> (ScrollBar) node)
                     .filter(scrollBar -> scrollBar.getOrientation() == Orientation.VERTICAL)
                     .findFirst()
-                    .ifPresent(scrollBar -> {
-                        scrollBar.valueProperty().addListener((obs2, oldVal, newVal) -> {
-                            if (!isLoading) {
-                                int index = (int) (newVal.doubleValue() * items.size());
-                                prefetchLines(index);
-                            }
-                        });
-                    });
+                    .ifPresent(this::setupScrollBar);
+            }
+        });
+    }
+    
+    private void setupScrollBar(ScrollBar scrollBar) {
+        // Update scroll bar to represent full file size
+        scrollBar.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isLoading) {
+                double scrollPosition = newVal.doubleValue();
+                handleScrollChange(scrollPosition);
+            }
+        });
+    }
+    
+    private void handleScrollChange(double scrollPosition) {
+        // Calculate the target line based on total lines and scroll position
+        int targetLine = (int) (scrollPosition * totalLines.get());
+        
+        // Ensure we stay within bounds
+        targetLine = Math.max(0, Math.min(targetLine, (int)totalLines.get() - 1));
+        
+        // Load content around the target line
+        int windowSize = 100; // Number of lines to load above and below
+        int startLine = Math.max(0, targetLine - windowSize);
+        int endLine = Math.min((int)totalLines.get() - 1, targetLine + windowSize);
+        
+        loadLinesRange(startLine, endLine);
+    }
+    
+    private void loadLinesRange(int startLine, int endLine) {
+        executor.submit(() -> {
+            try {
+                for (int i = startLine; i <= endLine; i++) {
+                    if (!lineCache.containsKey(i)) {
+                        final int index = i;
+                        String line = readLine(index);
+                        if (line != null) {
+                            lineCache.put(index, line);
+                            Platform.runLater(() -> {
+                                if (index < items.size()) {
+                                    items.set(index, line);
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Error loading lines range: " + startLine + " to " + endLine, e);
             }
         });
     }
@@ -103,12 +144,12 @@ public class XmlViewerController {
                 // Build line index and count lines
                 buildLineIndex();
                 
-                // Create placeholder items
+                // Create placeholder items for the entire file
                 Platform.runLater(() -> {
                     for (int i = 0; i < totalLines.get(); i++) {
                         items.add(null);
                     }
-                    xmlListView.setItems(items); // Reattach items
+                    xmlListView.setItems(items);
                 });
                 
                 // Load initial viewport content
