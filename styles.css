@@ -1,0 +1,117 @@
+:root {
+  /* Light theme (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f7fa;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-color: #ddd;
+  --highlight-color: #3498db;
+  --tag-color: #e74c3c;
+  --attribute-color: #2ecc71;
+  --value-color: #9b59b6;
+  --comment-color: #7f8c8d;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #282a36;
+  --text-primary: #f8f8f2;
+  --text-secondary: #bfbfbf;
+  --border-color: #44475a;
+  --highlight-color: #6272a4;
+  --tag-color: #ff79c6;
+  --attribute-color: #50fa7b;
+  --value-color: #bd93f9;
+  --comment-color: #6272a4;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+/* Update existing UI elements to use theme variables */
+.container {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+button, .button {
+  background-color: var(--highlight-color);
+  color: var(--bg-primary);
+  border: none;
+}
+
+/* XML syntax highlighting */
+.xml-tag {
+  color: var(--tag-color);
+}
+
+.xml-attribute {
+  color: var(--attribute-color);
+}
+
+.xml-value {
+  color: var(--value-color);
+}
+
+.xml-comment {
+  color: var(--comment-color);
+  font-style: italic;
+}
+
+/* Theme toggle switch */
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.theme-switch {
+  display: inline-block;
+  height: 24px;
+  position: relative;
+  width: 50px;
+}
+
+.theme-switch input {
+  display: none;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  background-color: white;
+  bottom: 4px;
+  content: "";
+  height: 16px;
+  left: 4px;
+  position: absolute;
+  transition: .4s;
+  width: 16px;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--highlight-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.theme-switch-wrapper span {
+  margin-left: 10px;
+  font-size: 14px;
+} 

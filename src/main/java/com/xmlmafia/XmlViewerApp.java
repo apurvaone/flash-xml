@@ -13,11 +13,25 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.scene.text.Text;
 import java.io.File;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Pos;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 
 public class XmlViewerApp extends Application {
     private XmlViewerController controller;
     private ListView<String> xmlListView;
     private BorderPane root;
+    private BooleanProperty isDarkTheme = new SimpleBooleanProperty(false);
 
     @Override
     public void start(Stage primaryStage) {
@@ -27,22 +41,51 @@ public class XmlViewerApp extends Application {
     private void initializeUI(Stage primaryStage) {
         root = new BorderPane();
         
+        // Create menu bar container
+        HBox menuContainer = new HBox();
+        menuContainer.setAlignment(Pos.CENTER_LEFT);
+        menuContainer.getStyleClass().add("menu-container");
+        
         // Create menu bar
         MenuBar menuBar = new MenuBar();
+        menuBar.setUseSystemMenuBar(false);
+        
+        // File menu
         Menu fileMenu = new Menu("File");
-        MenuItem openMenuItem = new MenuItem("Open");
+        MenuItem openMenuItem = new MenuItem("Open XML File");
         fileMenu.getItems().add(openMenuItem);
         menuBar.getMenus().add(fileMenu);
         
-        // Create toolbar
-        ToolBar toolBar = new ToolBar();
-        Button openButton = new Button("Open XML File");
-        openButton.setStyle("-fx-font-size: 14px; -fx-padding: 5 15;");
-        toolBar.getItems().add(openButton);
+        // Create theme toggle button
+        ToggleButton themeToggle = new ToggleButton();
+        themeToggle.setTooltip(new Tooltip("Toggle Dark/Light Theme"));
+        themeToggle.getStyleClass().add("theme-toggle");
         
-        // Create top container for menu and toolbar
+        // Create spacer to push theme toggle to the right
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        
+        // Set up theme toggle with text symbols
+        Label sunIcon = new Label("☀");
+        Label moonIcon = new Label("☾");
+        sunIcon.getStyleClass().add("theme-icon");
+        moonIcon.getStyleClass().add("theme-icon");
+        
+        themeToggle.setGraphic(sunIcon);
+        themeToggle.selectedProperty().bindBidirectional(isDarkTheme);
+        
+        themeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            themeToggle.setGraphic(newVal ? moonIcon : sunIcon);
+            root.getStyleClass().removeAll("light-theme", "dark-theme");
+            root.getStyleClass().add(newVal ? "dark-theme" : "light-theme");
+        });
+        
+        // Add all components to menu container
+        menuContainer.getChildren().addAll(menuBar, spacer, themeToggle);
+        
+        // Set menu container as the top container
         VBox topContainer = new VBox();
-        topContainer.getChildren().addAll(menuBar, toolBar);
+        topContainer.getChildren().add(menuContainer);
         
         xmlListView = new ListView<>();
         controller = new XmlViewerController(xmlListView);
@@ -76,6 +119,7 @@ public class XmlViewerApp extends Application {
         root.setCenter(centerPane);
         
         Scene scene = new Scene(root, 1200, 800);
+        root.getStyleClass().add("light-theme");
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
         
         // Setup file chooser
@@ -86,21 +130,18 @@ public class XmlViewerApp extends Application {
             new FileChooser.ExtensionFilter("All Files", "*.*")
         );
         
-        // Add open file action to both menu item and button
-        Runnable openFileAction = () -> {
+        // Add open file action to menu item
+        openMenuItem.setOnAction(e -> {
             File file = fileChooser.showOpenDialog(primaryStage);
             if (file != null) {
                 controller.loadFile(file);
                 primaryStage.setTitle("XML Mafia - " + file.getName());
             }
-        };
+        });
         
         // Add scroll button actions
         scrollUpButton.setOnAction(e -> xmlListView.scrollTo(0));
         scrollDownButton.setOnAction(e -> xmlListView.scrollTo(xmlListView.getItems().size() - 1));
-        
-        openMenuItem.setOnAction(e -> openFileAction.run());
-        openButton.setOnAction(e -> openFileAction.run());
         
         primaryStage.setTitle("XML Mafia - High Performance XML Viewer");
         primaryStage.setScene(scene);
