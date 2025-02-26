@@ -1,3 +1,29 @@
+/* Cell Styling */
+.list-cell {
+    -fx-padding: 2 5 0 0;
+    -fx-cell-size: 28;
+    -fx-max-height: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.text-flow {
+    -fx-line-spacing: 0;
+    -fx-max-height: 28;
+    -fx-min-height: 28;
+    -fx-alignment: CENTER-LEFT;
+    -fx-text-alignment: LEFT;
+    -fx-translate-y: 2;
+}
+
+.line-number {
+    -fx-font-family: monospace;
+    -fx-padding: 0 5 0 0;
+    -fx-text-alignment: right;
+    -fx-alignment: CENTER-RIGHT;
+}
+
 /* Light Theme */
 .light-theme {
     -fx-base: #f5f5f5;
