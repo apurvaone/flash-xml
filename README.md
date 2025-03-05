@@ -1,6 +1,6 @@
 # XML Mafia - The Ultimate High-Performance XML Viewer
 
-![xw5zZiXWbMxD8ang-generated_image (1)](https://github.com/user-attachments/assets/72a7b3e1-b0cd-4bd4-8bd6-f20a16d7d38d)
+![xw5zZiXWbMxD8ang-generated_image (2)](https://github.com/user-attachments/assets/9ecad2a0-297b-4d80-b7f3-b10f1f27134a)
 
 
 **Because XML Deserves Respect.**
