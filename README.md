@@ -1,4 +1,4 @@
-# XML Mafia - The Ultimate High-Performance XML Viewer
+# Flash XML - The Ultimate High-Performance XML Viewer
 **Because XML Deserves Respect.**
 
 
