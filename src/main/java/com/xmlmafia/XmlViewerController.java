@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class XmlViewerController {
     private static final Logger logger = LoggerFactory.getLogger(XmlViewerController.class);
@@ -38,6 +41,13 @@ public class XmlViewerController {
     private FileChannel fileChannel;
     private volatile boolean isLoading;
     private long fileSize;
+    
+    // Search related fields
+    private final List<SearchResult> searchResults = new ArrayList<>();
+    private final AtomicInteger currentSearchIndex = new AtomicInteger(-1);
+    private String currentSearchText = "";
+    private boolean currentCaseSensitive = false;
+    private Future<?> searchTask;
     
     public XmlViewerController(ListView<String> xmlListView) {
         this.xmlListView = xmlListView;
@@ -130,6 +140,9 @@ public class XmlViewerController {
         
         lineCache.clear();
         linePositionIndex.clear();
+        
+        // Clear search results when loading a new file
+        clearSearchResults();
         
         executor.submit(() -> {
             try {
@@ -289,6 +302,219 @@ public class XmlViewerController {
             logger.error("Error reading line: " + lineNumber, e);
             return null;
         }
+    }
+    
+    /**
+     * Search class to represent search results
+     */
+    private static class SearchResult {
+        final int lineNumber;
+        final int position;
+        final String lineText;
+        
+        SearchResult(int lineNumber, int position, String lineText) {
+            this.lineNumber = lineNumber;
+            this.position = position;
+            this.lineText = lineText;
+        }
+    }
+    
+    /**
+     * Performs a search for the next occurrence of text
+     * @param searchText The text to search for
+     * @param caseSensitive Whether the search is case sensitive
+     * @return The number of matches found
+     */
+    public int findNext(String searchText, boolean caseSensitive) {
+        // If search parameters changed, restart search
+        if (!searchText.equals(currentSearchText) || caseSensitive != currentCaseSensitive) {
+            return startNewSearch(searchText, caseSensitive);
+        }
+        
+        // If we have results, move to next one
+        if (!searchResults.isEmpty()) {
+            int nextIndex = currentSearchIndex.get() + 1;
+            if (nextIndex >= searchResults.size()) {
+                nextIndex = 0; // Wrap around
+            }
+            currentSearchIndex.set(nextIndex);
+            navigateToSearchResult(searchResults.get(nextIndex));
+            return searchResults.size();
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Performs a search for the previous occurrence of text
+     * @param searchText The text to search for
+     * @param caseSensitive Whether the search is case sensitive
+     * @return The number of matches found
+     */
+    public int findPrevious(String searchText, boolean caseSensitive) {
+        // If search parameters changed, restart search
+        if (!searchText.equals(currentSearchText) || caseSensitive != currentCaseSensitive) {
+            return startNewSearch(searchText, caseSensitive);
+        }
+        
+        // If we have results, move to previous one
+        if (!searchResults.isEmpty()) {
+            int prevIndex = currentSearchIndex.get() - 1;
+            if (prevIndex < 0) {
+                prevIndex = searchResults.size() - 1; // Wrap around
+            }
+            currentSearchIndex.set(prevIndex);
+            navigateToSearchResult(searchResults.get(prevIndex));
+            return searchResults.size();
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Starts a new search operation
+     * @param searchText The text to search for
+     * @param caseSensitive Whether the search is case sensitive
+     * @return Currently found results count (may increase as background search completes)
+     */
+    private int startNewSearch(String searchText, boolean caseSensitive) {
+        // Cancel any existing search task
+        if (searchTask != null && !searchTask.isDone()) {
+            searchTask.cancel(true);
+        }
+        
+        clearSearchResults();
+        
+        currentSearchText = searchText;
+        currentCaseSensitive = caseSensitive;
+        
+        // First search in visible/cached content immediately
+        searchInVisibleContent(searchText, caseSensitive);
+        
+        // Then start background search for the entire file
+        startBackgroundSearch(searchText, caseSensitive);
+        
+        // If we found any results, navigate to the first one
+        if (!searchResults.isEmpty()) {
+            currentSearchIndex.set(0);
+            navigateToSearchResult(searchResults.get(0));
+            return searchResults.size();
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Clears all search results
+     */
+    private void clearSearchResults() {
+        searchResults.clear();
+        currentSearchIndex.set(-1);
+        currentSearchText = "";
+    }
+    
+    /**
+     * Search in the currently visible/cached content for immediate results
+     * @param searchText The text to search for
+     * @param caseSensitive Whether the search is case sensitive
+     */
+    private void searchInVisibleContent(String searchText, boolean caseSensitive) {
+        // Create pattern with case sensitivity option
+        Pattern pattern = Pattern.compile(Pattern.quote(searchText), 
+                                         caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+        
+        // Search in cached lines first for immediate results
+        synchronized(lineCache) {
+            for (Map.Entry<Integer, String> entry : lineCache.entrySet()) {
+                int lineNumber = entry.getKey();
+                String lineText = entry.getValue();
+                
+                Matcher matcher = pattern.matcher(lineText);
+                while (matcher.find()) {
+                    searchResults.add(new SearchResult(lineNumber, matcher.start(), lineText));
+                }
+            }
+        }
+        
+        // Sort results by line number
+        searchResults.sort(Comparator.comparingInt(r -> r.lineNumber));
+    }
+    
+    /**
+     * Start a background task to search the entire file
+     * @param searchText The text to search for
+     * @param caseSensitive Whether the search is case sensitive
+     */
+    private void startBackgroundSearch(String searchText, boolean caseSensitive) {
+        // Create a set of lines we've already searched in the visible content
+        Set<Integer> searchedLines = new HashSet<>();
+        for (SearchResult result : searchResults) {
+            searchedLines.add(result.lineNumber);
+        }
+        
+        // Start background search task for the rest of the file
+        searchTask = executor.submit(() -> {
+            try {
+                Pattern pattern = Pattern.compile(Pattern.quote(searchText), 
+                                                 caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+                List<SearchResult> newResults = new ArrayList<>();
+                
+                // Search remaining lines (not already searched in visible content)
+                for (int i = 0; i < totalLines.get(); i++) {
+                    // Skip already searched lines
+                    if (searchedLines.contains(i)) {
+                        continue;
+                    }
+                    
+                    // Read the line (uses our efficient line reading approach)
+                    String line = readLine(i);
+                    if (line != null) {
+                        Matcher matcher = pattern.matcher(line);
+                        while (matcher.find()) {
+                            newResults.add(new SearchResult(i, matcher.start(), line));
+                        }
+                    }
+                    
+                    // Check if search was cancelled
+                    if (Thread.currentThread().isInterrupted()) {
+                        return;
+                    }
+                }
+                
+                // Add new results to the list
+                if (!newResults.isEmpty()) {
+                    Platform.runLater(() -> {
+                        searchResults.addAll(newResults);
+                        // Sort results by line number
+                        searchResults.sort(Comparator.comparingInt(r -> r.lineNumber));
+                        
+                        // If this is the first result, navigate to it
+                        if (searchResults.size() == newResults.size() && !searchResults.isEmpty()) {
+                            currentSearchIndex.set(0);
+                            navigateToSearchResult(searchResults.get(0));
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                logger.error("Error in background search", e);
+            }
+        });
+    }
+    
+    /**
+     * Navigate to a specific search result
+     * @param result The search result to navigate to
+     */
+    private void navigateToSearchResult(SearchResult result) {
+        // Scroll to the line
+        xmlListView.scrollTo(result.lineNumber);
+        
+        // Ensure line is loaded and visible
+        prefetchLines(result.lineNumber);
+        
+        // Select the item in the list
+        xmlListView.getSelectionModel().select(result.lineNumber);
+        xmlListView.getFocusModel().focus(result.lineNumber);
     }
     
     public void shutdown() {

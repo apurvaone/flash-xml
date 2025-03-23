@@ -3,6 +3,7 @@ com/xmlmafia/XmlTokenizer$Token.class
 com/xmlmafia/XmlTokenizer$State.class
 com/xmlmafia/XmlTokenizer$1.class
 com/xmlmafia/XmlViewerController$1.class
+com/xmlmafia/XmlViewerController$SearchResult.class
 com/xmlmafia/XmlTextArea.class
 com/xmlmafia/XmlTokenizer.class
 com/xmlmafia/XmlViewerController.class
