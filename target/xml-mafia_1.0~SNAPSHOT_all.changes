@@ -1,0 +1,20 @@
+Format: 1.8
+Date: Sun, 23 Mar 2025 19:53:17 +0530
+Source: xml-mafia
+Binary: xml-mafia
+Architecture: all
+Version: 1.0-SNAPSHOT
+Distribution: unknown
+Urgency: low
+Maintainer: XML Mafia <developer@xmlmafia.com>
+Changed-By: XML Mafia <developer@xmlmafia.com>
+Description:
+ xml-mafia - High-Performance XML Viewer for gigabyte-scale files
+Changes:
+ xml-mafia (1.0-SNAPSHOT) unknown; urgency=low
+Checksums-Sha1:
+ 4bec3bf8c30223b90ddaaa9c06688d00f203ff5a 8336034 xml-mafia_1.0~SNAPSHOT_all.deb
+Checksums-Sha256:
+ deb6889ef48f1e4e229fc3c78ff336347d1446505cb019a7021bea59171495f5 8336034 xml-mafia_1.0~SNAPSHOT_all.deb
+Files:
+ d690f0a25940c73169786e8c04b88091 8336034 utils optional xml-mafia_1.0~SNAPSHOT_all.deb

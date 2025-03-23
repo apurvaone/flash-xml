@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=XML Mafia
+GenericName=XML Viewer
+Comment=High-Performance XML Viewer for gigabyte-scale files
+Exec=xml-mafia %f
+Icon=xml-mafia
+Terminal=false
+Type=Application
+Categories=Development;Utility;
+MimeType=text/xml;application/xml;
+Keywords=XML;Viewer;Editor;

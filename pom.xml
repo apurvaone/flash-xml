@@ -13,6 +13,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <javafx.version>11.0.2</javafx.version>
+        <app.main.class>com.xmlmafia.XmlViewerApp</app.main.class>
     </properties>
 
     <dependencies>
@@ -54,8 +55,87 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.xmlmafia.XmlViewerApp</mainClass>
+                    <mainClass>${app.main.class}</mainClass>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>${app.main.class}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <dataSet>
+                                <!-- Include the JAR file -->
+                                <data>
+                                    <src>${project.build.directory}/${project.artifactId}-${project.version}-jar-with-dependencies.jar</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/xml-mafia</prefix>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+                                <!-- Include launcher script -->
+                                <data>
+                                    <src>${project.basedir}/src/deb/xml-mafia</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/bin</prefix>
+                                        <filemode>755</filemode>
+                                    </mapper>
+                                </data>
+                                <!-- Include desktop file -->
+                                <data>
+                                    <src>${project.basedir}/src/deb/xml-mafia.desktop</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/applications</prefix>
+                                    </mapper>
+                                </data>
+                                <!-- Include icon -->
+                                <data>
+                                    <src>${project.basedir}/src/deb/xml-mafia.png</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/pixmaps</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

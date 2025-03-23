@@ -1,0 +1,17 @@
+Package: xml-mafia
+Version: 1.0-SNAPSHOT
+Section: utils
+Priority: optional
+Architecture: all
+Depends: openjdk-11-jre | openjdk-17-jre, openjfx
+Maintainer: XML Mafia <developer@xmlmafia.com>
+Description: High-Performance XML Viewer for gigabyte-scale files
+ XML Mafia is a high-performance XML viewer built to handle
+ gigabyte-scale XML files with unmatched speed and efficiency.
+ .
+ It uses memory-mapped I/O and virtualized display to efficiently
+ handle even the largest XML files without sacrificing
+ syntax highlighting or smooth scrolling.
+ .
+ XML Mafia is perfect for developers, data analysts, and
+ anyone who works with large XML data files.

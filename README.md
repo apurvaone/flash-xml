@@ -8,6 +8,31 @@
 
 ---
 
+## 📥 Download
+
+<div align="center">
+  <a href="https://github.com/apurvaone/flash-xml/releases/latest/download/xml-mafia_1.0-SNAPSHOT_all.deb">
+    <img src="https://img.shields.io/badge/Download-Debian%20Package-blue?style=for-the-badge&logo=debian" alt="Download Debian Package" />
+  </a>
+</div>
+
+### 🐧 Debian/Ubuntu Installation:
+
+```bash
+# Download the package
+wget https://github.com/apurvaone/flash-xml/releases/latest/download/xml-mafia_1.0-SNAPSHOT_all.deb
+
+# Install the package
+sudo apt install ./xml-mafia_1.0-SNAPSHOT_all.deb
+
+# Launch from terminal
+xml-mafia
+```
+
+You can also launch XML Mafia from your application menu after installation.
+
+---
+
 ## 🚀 Blazing Fast. Uncompromisingly Smooth.
 
 Tired of sluggish XML editors choking on large files? Meet **XML Mafia**—a high-performance XML viewer built to handle **gigabyte-scale XML files** with unmatched speed and efficiency. Whether you’re dealing with **massive datasets, complex CXML files, or deeply nested structures**, XML Mafia loads them **instantly**, without sacrificing syntax highlighting or smooth scrolling.
@@ -97,7 +122,7 @@ java --module-path /usr/share/openjfx/lib --add-modules javafx.controls,javafx.f
 
 ## 🛠 Contributing
 
-XML Mafia is built for speed and efficiency, making it easier than ever to work with large XML files. But every great tool needs a great community to push it to the next level. Whether you're a developer, designer, tester, or just a power user with brilliant ideas, we want you on board!
+XML Mafia is built for speed and efficiency, making it easier than ever to work with large XML files. But every great tool needs a great community to push it to the next level. Whether you’re a developer, designer, tester, or just a power user with brilliant ideas, we want you on board!
 
 ### How You Can Help:
 
@@ -107,4 +132,3 @@ XML Mafia is built for speed and efficiency, making it easier than ever to work 
 🔹 **Spread the Word** – Share XML Mafia with fellow developers, because no one should suffer slow XML viewers ever again!  
 
 Join us in making XML Mafia the **fastest, smoothest, and most powerful XML editor in the world**. The family is growing—be a part of it! 💥
-

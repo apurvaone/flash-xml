@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+# Update desktop database
+if [ -x "$(command -v update-desktop-database)" ]; then
+    update-desktop-database
+fi
+
+# Update mime database
+if [ -x "$(command -v update-mime-database)" ]; then
+    update-mime-database /usr/share/mime
+fi
+
+exit 0
